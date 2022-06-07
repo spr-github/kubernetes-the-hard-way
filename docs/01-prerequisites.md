@@ -8,7 +8,7 @@ This tutorial leverages [Microsoft Azure](https://azure.microsoft.com/en-us/) to
 
 ## nix* Environment
 
-If you're running this tutorial from a Linux or macOS machine, you're all set. If you're running on Windows, you'll need to use WSL. Instructions for setting that up can be found in the official docs [HERE](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
+If you're running this tutorial from a Linux or macOS machine, you're all set. If you're running on Windows, you'll need to use WSL. Instructions for setting that up can be found in the official docs [HERE](https://docs.microsoft.com/en-us/windows/wsl/install).
 
 ## Azure CLI
 
@@ -29,7 +29,7 @@ az login
 Set a default compute region:
 
 ```
-az configure --default region=westus2
+az configure --default region=eastus
 ```
 
 ## Running Commands in Parallel with tmux
