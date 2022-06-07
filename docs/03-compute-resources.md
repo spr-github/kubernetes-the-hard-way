@@ -8,7 +8,23 @@ Kubernetes requires a set of machines to host the Kubernetes control plane and t
 In Azure, compute resources are tied to a resource group, let's create one for the tutorial:
 
 ```
-az group create --name kubernetes-the-hard-way --location westus2
+az group create --name k8s-the-hard-way --location eastus
+```
+
+> output
+
+```json
+{
+  "id": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/k8s-the-hard-way",
+  "location": "eastus",
+  "managedBy": null,
+  "name": "k8s-the-hard-way",
+  "properties": {
+    "provisioningState": "Succeeded"
+  },
+  "tags": null,
+  "type": "Microsoft.Resources/resourceGroups"
+}
 ```
 
 ## Networking
@@ -25,10 +41,10 @@ Create the `kubernetes-the-hard-way` custom VNET network and subnet:
 
 ```
 az network vnet create \
-  --resource-group kubernetes-the-hard-way \
-  --name kubernetes-the-hard-way-vnet \
+  --resource-group k8s-the-hard-way \
+  --name k8s-the-hard-way-vnet \
   --address-prefixes 10.240.0.0/16 \
-  --subnet-name kubernetes-the-hard-way-subnet \
+  --subnet-name k8s-the-hard-way-subnet \
   --subnet-prefixes 10.240.0.0/24
 ```
 
@@ -39,15 +55,15 @@ az network vnet create \
 Create a security group that allows internal communication across all protocols:
 
 ```
-az network nsg create --resource-group kubernetes-the-hard-way --name kubernetes-the-hard-way-nsg
+az network nsg create --resource-group k8s-the-hard-way --name k8s-the-hard-way-nsg
 ```
 
 Create a firewall rule that allows external SSH, and HTTPS:
 
 ```
 az network nsg rule create \
-  --resource-group kubernetes-the-hard-way \
-  --nsg-name kubernetes-the-hard-way-nsg \
+  --resource-group k8s-the-hard-way \
+  --nsg-name k8s-the-hard-way-nsg \
   --name K8s \
   --access Allow \
   --protocol Tcp \
@@ -60,10 +76,10 @@ az network nsg rule create \
 
 > An [external load balancer](https://azure.microsoft.com/en-us/services/load-balancer/) will be used to expose the Kubernetes API Servers to remote clients.
 
-List the security group rule in the `kubernetes-the-hard-way` resource group:
+List the security group rule in the `k8s-the-hard-way` resource group:
 
 ```
-az network nsg rule show --resource-group kubernetes-the-hard-way --name K8s --nsg-name kubernetes-the-hard-way-nsg
+az network nsg rule show --resource-group k8s-the-hard-way --name K8s --nsg-name k8s-the-hard-way-nsg
 ```
 
 > output
@@ -81,14 +97,14 @@ az network nsg rule show --resource-group kubernetes-the-hard-way --name K8s --n
     "6443"
   ],
   "direction": "Inbound",
-  "etag": "W/\"XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX\"",
-  "id": "/subscriptions/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/resourceGroups/kubernetes-the-hard-way/providers/Microsoft.Network/networkSecurityGroups/kubernetes-the-hard-way-nsg/securityRules/K8s",
+  "etag": "W/\"716618b2-6703-49f8-a488-844de09522a6\"",
+  "id": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/k8s-the-hard-way/providers/Microsoft.Network/networkSecurityGroups/k8s-the-hard-way-nsg/securityRules/K8s",
   "name": "K8s",
   "priority": 100,
   "protocol": "Tcp",
   "provisioningState": "Succeeded",
-  "resourceGroup": "kubernetes-the-hard-way",
-  "sourceAddressPrefix": "Internet",
+  "resourceGroup": "k8s-the-hard-way",
+  "sourceAddressPrefix": "*",
   "sourceAddressPrefixes": [],
   "sourceApplicationSecurityGroups": null,
   "sourcePortRange": "*",
@@ -103,15 +119,15 @@ Allocate a static IP address that will be attached to the external load balancer
 
 ```
 az network public-ip create \
-  --name kubernetes-the-hard-way-ip \
-  --resource-group kubernetes-the-hard-way \
+  --name k8s-the-hard-way-ip \
+  --resource-group k8s-the-hard-way \
   --allocation-method Static
 ```
 
-Verify the `kubernetes-the-hard-way` static IP address was created in your default compute region:
+Verify the `k8s-the-hard-way` static IP address was created in your default compute region:
 
 ```
-az network public-ip show --resource-group kubernetes-the-hard-way --name kubernetes-the-hard-way-ip
+az network public-ip show --resource-group k8s-the-hard-way --name k8s-the-hard-way-ip
 ```
 
 > output
@@ -119,21 +135,27 @@ az network public-ip show --resource-group kubernetes-the-hard-way --name kubern
 ```json
 {
   "ddosSettings": null,
+  "deleteOption": null,
   "dnsSettings": null,
-  "etag": "W/\"XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX\"",
-  "id": "/subscriptions/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/resourceGroups/kubernetes-the-hard-way/providers/Microsoft.Network/publicIPAddresses/kubernetes-the-hard-way-ip",
+  "etag": "W/\"c1cf04cc-9c30-4f57-b90d-a44062699064\"",
+  "extendedLocation": null,
+  "id": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/k8s-the-hard-way/providers/Microsoft.Network/publicIPAddresses/k8s-the-hard-way-ip",
   "idleTimeoutInMinutes": 4,
-  "ipAddress": "XX.XXX.XXX.XX",
+  "ipAddress": "20.120.83.207",
   "ipConfiguration": null,
   "ipTags": [],
-  "location": "westus2",
-  "name": "kubernetes-the-hard-way-ip",
+  "linkedPublicIpAddress": null,
+  "location": "eastus",
+  "migrationPhase": null,
+  "name": "k8s-the-hard-way-ip",
+  "natGateway": null,
   "provisioningState": "Succeeded",
   "publicIpAddressVersion": "IPv4",
   "publicIpAllocationMethod": "Static",
   "publicIpPrefix": null,
-  "resourceGroup": "kubernetes-the-hard-way",
-  "resourceGuid": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+  "resourceGroup": "k8s-the-hard-way",
+  "resourceGuid": "08d52962-3f4c-4112-8f25-515474bc9c71",
+  "servicePublicIpAddress": null,
   "sku": {
     "name": "Basic",
     "tier": "Regional"
@@ -146,7 +168,7 @@ az network public-ip show --resource-group kubernetes-the-hard-way --name kubern
 
 ## The Kubernetes Frontend Load Balancer
 
-In this section you will provision an external load balancer to front the Kubernetes API Servers. The `kubernetes-the-hard-way-ip` static IP address will be attached to the resulting load balancer.
+In this section you will provision an external load balancer to front the Kubernetes API Servers. The `k8s-the-hard-way-ip` static IP address will be attached to the resulting load balancer.
 
 > The compute instances created in this tutorial will not have permission to complete this section. Run the following commands from the same machine used to create the compute instances.
 
@@ -157,29 +179,29 @@ Create the external load balancer network resources:
 
 ```
 az network lb create \
-  --name kubernetes-the-hard-way-lb \
-  --resource-group kubernetes-the-hard-way \
-  --backend-pool-name kubernetes-the-hard-way-lb-pool \
-  --public-ip-address kubernetes-the-hard-way-ip
+  --name k8s-the-hard-way-lb \
+  --resource-group k8s-the-hard-way \
+  --backend-pool-name k8s-the-hard-way-lb-pool \
+  --public-ip-address k8s-the-hard-way-ip
 ```
 ```
 az network lb probe create \
-  --lb-name kubernetes-the-hard-way-lb \
-  --resource-group kubernetes-the-hard-way \
-  --name kubernetes-the-hard-way-lb-probe \
+  --lb-name k8s-the-hard-way-lb \
+  --resource-group k8s-the-hard-way \
+  --name k8s-the-hard-way-lb-probe \
   --port 80 \
   --protocol tcp
 ```
 ```
 az network lb rule create \
-  --resource-group kubernetes-the-hard-way \
-  --lb-name kubernetes-the-hard-way-lb \
-  --name kubernetes-the-hard-way-lb-rule \
+  --resource-group k8s-the-hard-way \
+  --lb-name k8s-the-hard-way-lb \
+  --name k8s-the-hard-way-lb-rule \
   --protocol tcp \
   --frontend-port 6443 \
   --backend-port 6443 \
-  --backend-pool-name kubernetes-the-hard-way-lb-pool \
-  --probe-name kubernetes-the-hard-way-lb-probe  
+  --backend-pool-name k8s-the-hard-way-lb-pool \
+  --probe-name k8s-the-hard-way-lb-probe  
 ```
 
 ## Compute Instances
@@ -194,34 +216,34 @@ Create three network interfaces and three compute instances (in an availability 
 for i in 0 1 2; do
   az network public-ip create \
     --name controller-${i}-ip \
-    --resource-group kubernetes-the-hard-way \
+    --resource-group k8s-the-hard-way \
     --allocation-method Static
 done
 ```
 ```
 for i in 0 1 2; do
   az network nic create \
-    --resource-group kubernetes-the-hard-way \
+    --resource-group k8s-the-hard-way \
     --name controller-${i}-nic \
-    --vnet-name kubernetes-the-hard-way-vnet \
-    --subnet kubernetes-the-hard-way-subnet \
-    --network-security-group kubernetes-the-hard-way-nsg \
+    --vnet-name k8s-the-hard-way-vnet \
+    --subnet k8s-the-hard-way-subnet \
+    --network-security-group k8s-the-hard-way-nsg \
     --public-ip-address controller-${i}-ip \
     --private-ip-address 10.240.0.1${i} \
-    --lb-name kubernetes-the-hard-way-lb \
-    --lb-address-pools kubernetes-the-hard-way-lb-pool \
+    --lb-name k8s-the-hard-way-lb \
+    --lb-address-pools k8s-the-hard-way-lb-pool \
     --ip-forwarding true
 done
 ```
 ```
-az vm availability-set create --name kubernetes-the-hard-way-as -g kubernetes-the-hard-way 
+az vm availability-set create --name k8s-the-hard-way-as -g k8s-the-hard-way 
 ```
 ```
 for i in 0 1 2; do
   az vm create \
     --name controller-${i} \
-    --resource-group kubernetes-the-hard-way \
-    --availability-set kubernetes-the-hard-way-as \
+    --resource-group k8s-the-hard-way \
+    --availability-set k8s-the-hard-way-as \
     --no-wait \
     --nics controller-${i}-nic \
     --image UbuntuLTS \
@@ -244,18 +266,18 @@ Create three compute instances which will host the Kubernetes worker nodes:
 for i in 0 1 2; do
   az network public-ip create \
     --name worker-${i}-ip \
-    --resource-group kubernetes-the-hard-way \
+    --resource-group k8s-the-hard-way \
     --allocation-method Static
 done
 ```
 ```
 for i in 0 1 2; do
   az network nic create \
-    --resource-group kubernetes-the-hard-way \
+    --resource-group k8s-the-hard-way \
     --name worker-${i}-nic \
-    --vnet-name kubernetes-the-hard-way-vnet \
-    --subnet kubernetes-the-hard-way-subnet \
-    --network-security-group kubernetes-the-hard-way-nsg \
+    --vnet-name k8s-the-hard-way-vnet \
+    --subnet k8s-the-hard-way-subnet \
+    --network-security-group k8s-the-hard-way-nsg \
     --public-ip worker-${i}-ip \
     --private-ip-address 10.240.0.2${i} \
     --ip-forwarding true \
@@ -266,7 +288,7 @@ done
 for i in 0 1 2; do
   az vm create \
     --name worker-${i} \
-    --resource-group kubernetes-the-hard-way \
+    --resource-group k8s-the-hard-way \
     --no-wait \
     --nics worker-${i}-nic \
     --image UbuntuLTS \
@@ -283,20 +305,20 @@ done
 List the compute instances in your default compute zone:
 
 ```
-az vm list --resource-group kubernetes-the-hard-way --output table
+az vm list --resource-group k8s-the-hard-way --output table
 ```
 
 > output
 
 ```
-Name          ResourceGroup            Location    Zones
-------------  -----------------------  ----------  -------
-controller-0  kubernetes-the-hard-way  westus2
-controller-1  kubernetes-the-hard-way  westus2
-controller-2  kubernetes-the-hard-way  westus2
-worker-0      kubernetes-the-hard-way  westus2
-worker-1      kubernetes-the-hard-way  westus2
-worker-2      kubernetes-the-hard-way  westus2
+Name          ResourceGroup     Location    Zones
+------------  ----------------  ----------  -------
+controller-0  k8s-the-hard-way  eastus
+controller-1  k8s-the-hard-way  eastus
+controller-2  k8s-the-hard-way  eastus
+worker-0      k8s-the-hard-way  eastus
+worker-1      k8s-the-hard-way  eastus
+worker-2      k8s-the-hard-way  eastus
 ```
 
 ## Configuring SSH Access
@@ -307,7 +329,7 @@ Let's build an SSH config file to easily be able to SSH to all our controller an
 
 ```
 for instance in controller-0 controller-1 controller-2 worker-0 worker-1 worker-2; do
-  EXTERNAL_IP=$(az vm show --show-details -g kubernetes-the-hard-way -n ${instance} --query publicIps --output tsv)
+  EXTERNAL_IP=$(az vm show --show-details -g k8s-the-hard-way -n ${instance} --query publicIps --output tsv)
   cat <<EOF | tee -a ~/.ssh/config
   Host ${instance}
   User azureuser
