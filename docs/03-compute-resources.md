@@ -224,7 +224,7 @@ for i in 0 1 2; do
     --availability-set kubernetes-the-hard-way-as \
     --no-wait \
     --nics controller-${i}-nic \
-    --image Canonical:UbuntuServer:20.04-LTS:latest \
+    --image UbuntuLTS \
     --admin-username azureuser \
     --generate-ssh-keys \
     --size Standard_B2s \
@@ -269,7 +269,7 @@ for i in 0 1 2; do
     --resource-group kubernetes-the-hard-way \
     --no-wait \
     --nics worker-${i}-nic \
-    --image Canonical:UbuntuServer:20.04-LTS:latest \
+    --image UbuntuLTS \
     --admin-username azureuser \
     --generate-ssh-keys \
     --size Standard_B2s \
