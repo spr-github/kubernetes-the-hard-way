@@ -24,7 +24,8 @@ cat > ca-config.json <<EOF
   }
 }
 EOF
-
+```
+```
 cat > ca-csr.json <<EOF
 {
   "CN": "Kubernetes",
@@ -43,7 +44,8 @@ cat > ca-csr.json <<EOF
   ]
 }
 EOF
-
+```
+```
 cfssl gencert -initca ca-csr.json | cfssljson -bare ca
 ```
 
@@ -125,8 +127,8 @@ cat > ${instance}-csr.json <<EOF
 }
 EOF
 
-EXTERNAL_IP=$(az vm show --show-details -g kubernetes-the-hard-way -n ${instance} --query publicIps --output tsv)
-INTERNAL_IP=$(az vm show --show-details -g kubernetes-the-hard-way -n ${instance} --query privateIps --output tsv)
+EXTERNAL_IP=$(az vm show --show-details -g k8s-the-hard-way -n ${instance} --query publicIps --output tsv)
+INTERNAL_IP=$(az vm show --show-details -g k8s-the-hard-way -n ${instance} --query privateIps --output tsv)
 
 cfssl gencert \
   -ca=ca.pem \
@@ -278,7 +280,7 @@ The `kubernetes-the-hard-way` static IP address will be included in the list of 
 Generate the Kubernetes API Server certificate and private key:
 
 ```
-KUBERNETES_PUBLIC_ADDRESS=$(az network public-ip show -g kubernetes-the-hard-way -n kubernetes-the-hard-way-ip --output tsv | cut -f6)
+KUBERNETES_PUBLIC_ADDRESS=$(az network public-ip show -g k8s-the-hard-way -n k8s-the-hard-way-ip --query ipAddress --output tsv)
 
 cat > kubernetes-csr.json <<EOF
 {
