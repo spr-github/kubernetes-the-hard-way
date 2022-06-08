@@ -10,10 +10,10 @@ In this section you will generate kubeconfig files for the `controller manager`,
 
 Each kubeconfig requires a Kubernetes API Server to connect to. To support high availability the IP address assigned to the external load balancer fronting the Kubernetes API Servers will be used.
 
-Retrieve the `kubernetes-the-hard-way` static IP address:
+Retrieve the `k8s-the-hard-way` static IP address:
 
 ```
-KUBERNETES_PUBLIC_ADDRESS=$(az network public-ip show -g kubernetes-the-hard-way -n kubernetes-the-hard-way-ip --query ipAddress --output tsv)
+KUBERNETES_PUBLIC_ADDRESS=$(az network public-ip show -g k8s-the-hard-way -n k8s-the-hard-way-ip --query ipAddress --output tsv)
 ```
 
 ### The kubelet Kubernetes Configuration File
@@ -24,7 +24,7 @@ Generate a kubeconfig file for each worker node:
 
 ```
 for instance in worker-0 worker-1 worker-2; do
-  kubectl config set-cluster kubernetes-the-hard-way \
+  kubectl config set-cluster k8s-the-hard-way \
     --certificate-authority=ca.pem \
     --embed-certs=true \
     --server=https://${KUBERNETES_PUBLIC_ADDRESS}:6443 \
@@ -37,7 +37,7 @@ for instance in worker-0 worker-1 worker-2; do
     --kubeconfig=${instance}.kubeconfig
 
   kubectl config set-context default \
-    --cluster=kubernetes-the-hard-way \
+    --cluster=k8s-the-hard-way \
     --user=system:node:${instance} \
     --kubeconfig=${instance}.kubeconfig
 
@@ -58,7 +58,7 @@ worker-2.kubeconfig
 Generate a kubeconfig file for the `kube-proxy` service:
 
 ```
-  kubectl config set-cluster kubernetes-the-hard-way \
+  kubectl config set-cluster k8s-the-hard-way \
     --certificate-authority=ca.pem \
     --embed-certs=true \
     --server=https://${KUBERNETES_PUBLIC_ADDRESS}:6443 \
@@ -71,7 +71,7 @@ Generate a kubeconfig file for the `kube-proxy` service:
     --kubeconfig=kube-proxy.kubeconfig
 
   kubectl config set-context default \
-    --cluster=kubernetes-the-hard-way \
+    --cluster=k8s-the-hard-way \
     --user=system:kube-proxy \
     --kubeconfig=kube-proxy.kubeconfig
 
@@ -89,7 +89,7 @@ kube-proxy.kubeconfig
 Generate a kubeconfig file for the `kube-controller-manager` service:
 
 ```
-  kubectl config set-cluster kubernetes-the-hard-way \
+  kubectl config set-cluster k8s-the-hard-way \
     --certificate-authority=ca.pem \
     --embed-certs=true \
     --server=https://127.0.0.1:6443 \
@@ -102,7 +102,7 @@ Generate a kubeconfig file for the `kube-controller-manager` service:
     --kubeconfig=kube-controller-manager.kubeconfig
 
   kubectl config set-context default \
-    --cluster=kubernetes-the-hard-way \
+    --cluster=k8s-the-hard-way \
     --user=system:kube-controller-manager \
     --kubeconfig=kube-controller-manager.kubeconfig
 
@@ -121,7 +121,7 @@ kube-controller-manager.kubeconfig
 Generate a kubeconfig file for the `kube-scheduler` service:
 
 ```
-  kubectl config set-cluster kubernetes-the-hard-way \
+  kubectl config set-cluster k8s-the-hard-way \
     --certificate-authority=ca.pem \
     --embed-certs=true \
     --server=https://127.0.0.1:6443 \
@@ -134,7 +134,7 @@ Generate a kubeconfig file for the `kube-scheduler` service:
     --kubeconfig=kube-scheduler.kubeconfig
 
   kubectl config set-context default \
-    --cluster=kubernetes-the-hard-way \
+    --cluster=k8s-the-hard-way \
     --user=system:kube-scheduler \
     --kubeconfig=kube-scheduler.kubeconfig
 
@@ -152,7 +152,7 @@ kube-scheduler.kubeconfig
 Generate a kubeconfig file for the `admin` user:
 
 ```
-  kubectl config set-cluster kubernetes-the-hard-way \
+  kubectl config set-cluster k8s-the-hard-way \
     --certificate-authority=ca.pem \
     --embed-certs=true \
     --server=https://127.0.0.1:6443 \
@@ -165,7 +165,7 @@ Generate a kubeconfig file for the `admin` user:
     --kubeconfig=admin.kubeconfig
 
   kubectl config set-context default \
-    --cluster=kubernetes-the-hard-way \
+    --cluster=k8s-the-hard-way \
     --user=admin \
     --kubeconfig=admin.kubeconfig
 
