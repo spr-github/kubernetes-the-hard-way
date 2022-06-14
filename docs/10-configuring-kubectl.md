@@ -11,9 +11,9 @@ Each kubeconfig requires a Kubernetes API Server to connect to. To support high 
 Generate a kubeconfig file suitable for authenticating as the `admin` user:
 
 ```
-KUBERNETES_PUBLIC_ADDRESS=$(az network public-ip show -g kubernetes-the-hard-way -n kubernetes-the-hard-way-ip --query ipAddress --output tsv)
+KUBERNETES_PUBLIC_ADDRESS=$(az network public-ip show -g k8s-the-hard-way -n k8s-the-hard-way-ip --query ipAddress --output tsv)
 
-kubectl config set-cluster kubernetes-the-hard-way \
+kubectl config set-cluster k8s-the-hard-way \
   --certificate-authority=ca.pem \
   --embed-certs=true \
   --server=https://${KUBERNETES_PUBLIC_ADDRESS}:6443
@@ -22,11 +22,11 @@ kubectl config set-credentials admin \
   --client-certificate=admin.pem \
   --client-key=admin-key.pem
 
-kubectl config set-context kubernetes-the-hard-way \
-  --cluster=kubernetes-the-hard-way \
+kubectl config set-context k8s-the-hard-way \
+  --cluster=k8s-the-hard-way \
   --user=admin
 
-kubectl config use-context kubernetes-the-hard-way
+kubectl config use-context k8s-the-hard-way
 ```
 
 ## Verification
