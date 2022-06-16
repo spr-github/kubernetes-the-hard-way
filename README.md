@@ -1,4 +1,4 @@
-:x: THIS TUTORIAL IS CURRENTLY IN A BROKEN STATE. IT IS BEING UPDATED AND WILL BE WORKING AGAIN SOON :x:
+:x: **THIS TUTORIAL IS CURRENTLY IN A BROKEN STATE. IT IS BEING UPDATED AND WILL BE WORKING AGAIN SOON** :x:
 
 # Kubernetes The Hard Way (On Azure!)
 This is a fork of [Kelsey Hightower](https://github.com/kelseyhightower)'s amazing Kubernetes the Hard Way tutorial. If you're interested in trying this out on Google Cloud Platform, check out his repo [here](https://github.com/kelseyhightower/kubernetes-the-hard-way)!
