@@ -9,11 +9,11 @@ In this section you will verify the ability to [encrypt secret data at rest](htt
 Create a generic secret:
 
 ```
-kubectl create secret generic kubernetes-the-hard-way \
+kubectl create secret generic k8s-the-hard-way \
   --from-literal="mykey=mydata"
 ```
 
-Print a hexdump of the `kubernetes-the-hard-way` secret stored in etcd:
+Print a hexdump of the `k8s-the-hard-way` secret stored in etcd:
 
 ```
 ssh controller-0
@@ -23,7 +23,7 @@ sudo ETCDCTL_API=3 etcdctl get \
   --cacert=/etc/etcd/ca.pem \
   --cert=/etc/etcd/kubernetes.pem \
   --key=/etc/etcd/kubernetes-key.pem\
-  /registry/secrets/default/kubernetes-the-hard-way | hexdump -C
+  /registry/secrets/default/k8s-the-hard-way | hexdump -C
 ```
 
 > output
@@ -56,13 +56,13 @@ In this section you will verify the ability to create and manage [Deployments](h
 Create a deployment for the [nginx](https://nginx.org/en/) web server:
 
 ```
-kubectl run nginx --image=nginx
+kubectl create deployment nginx --image=nginx
 ```
 
 List the pod created by the `nginx` deployment:
 
 ```
-kubectl get pods -l run=nginx
+kubectl get pods -l app=nginx
 ```
 
 > output
@@ -79,7 +79,7 @@ In this section you will verify the ability to access applications remotely usin
 Retrieve the full name of the `nginx` pod:
 
 ```
-POD_NAME=$(kubectl get pods -l run=nginx -o jsonpath="{.items[0].metadata.name}")
+POD_NAME=$(kubectl get pods -l app=nginx -o jsonpath="{.items[0].metadata.name}")
 ```
 
 Forward port `8080` on your local machine to port `80` of the `nginx` pod:
@@ -105,7 +105,7 @@ curl --head http://127.0.0.1:8080
 
 ```
 HTTP/1.1 200 OK
-Server: nginx/1.15.4
+Server: nginx/1.21.6
 Date: Sun, 30 Sep 2018 19:23:10 GMT
 Content-Type: text/html
 Content-Length: 612
@@ -153,7 +153,7 @@ kubectl exec -ti $POD_NAME -- nginx -v
 > output
 
 ```
-nginx version: nginx/1.15.4
+nginx version: nginx/1.21.6
 ```
 
 ## Services
@@ -179,8 +179,8 @@ Create a firewall rule that allows remote access to the `nginx` node port:
 
 ```
 az network nsg rule create \
-  --resource-group kubernetes-the-hard-way \
-  --nsg-name kubernetes-the-hard-way-nsg \
+  --resource-group k8s-the-hard-way \
+  --nsg-name k8s-the-hard-way-nsg \
   --name nginx \
   --access Allow \
   --direction Inbound \
@@ -188,13 +188,13 @@ az network nsg rule create \
   --protocol Tcp \
   --source-address-prefixes "*" \
   --source-port-range "*" \
-  --destination-port-ranges ${NODE_PORT} \
+  --destination-port-ranges ${NODE_PORT} 
 ```
 
 Retrieve the external IP address of a worker instance:
 
 ```
-EXTERNAL_IP=$(az vm show --show-details -g kubernetes-the-hard-way -n worker-0 --query publicIps --output tsv)
+EXTERNAL_IP=$(az vm show --show-details -g k8s-the-hard-way -n worker-0 --query publicIps --output tsv)
 ```
 
 Make an HTTP request using the external IP address and the `nginx` node port:
@@ -207,7 +207,7 @@ curl -I http://${EXTERNAL_IP}:${NODE_PORT}
 
 ```
 HTTP/1.1 200 OK
-Server: nginx/1.15.4
+Server: nginx/1.21.6
 Date: Sun, 30 Sep 2018 19:25:40 GMT
 Content-Type: text/html
 Content-Length: 612
@@ -264,7 +264,7 @@ INSTANCE_NAME=$(kubectl get pod untrusted --output=jsonpath='{.spec.nodeName}')
 SSH into the worker node:
 
 ```
-EXTERNAL_IP=$(az vm show --show-details -g kubernetes-the-hard-way -n ${INSTANCE_NAME} --query publicIps --output tsv)
+EXTERNAL_IP=$(az vm show --show-details -g k8s-the-hard-way -n ${INSTANCE_NAME} --query publicIps --output tsv)
 ssh azureuser@${EXTERNAL_IP} 
 ```
 

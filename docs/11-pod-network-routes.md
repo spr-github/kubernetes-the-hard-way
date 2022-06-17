@@ -48,11 +48,11 @@ az network route-table route list --resource-group k8s-the-hard-way --route-tabl
 > output
 
 ```
-AddressPrefix    Name                                         NextHopIpAddress    NextHopType       ProvisioningState    ResourceGroup
----------------  -------------------------------------------  ------------------  ----------------  -------------------  -----------------------
-10.200.0.0/24    k8s-the-hard-way-route-10-200-0-0-24  10.240.0.20         VirtualAppliance  Succeeded            k8s-the-hard-way
-10.200.1.0/24    k8s-the-hard-way-route-10-200-1-0-24  10.240.0.21         VirtualAppliance  Succeeded            k8s-the-hard-way
-10.200.2.0/24    k8s-the-hard-way-route-10-200-2-0-24  10.240.0.22         VirtualAppliance  Succeeded            k8s-the-hard-way
+AddressPrefix    HasBgpOverride    Name                                  NextHopIpAddress    NextHopType       ProvisioningState    ResourceGroup
+---------------  ----------------  ------------------------------------  ------------------  ----------------  -------------------  ----------------
+10.200.0.0/24    False             k8s-the-hard-way-route-10-200-0-0-24  10.240.0.20         VirtualAppliance  Succeeded            k8s-the-hard-way
+10.200.1.0/24    False             k8s-the-hard-way-route-10-200-1-0-24  10.240.0.21         VirtualAppliance  Succeeded            k8s-the-hard-way
+10.200.2.0/24    False             k8s-the-hard-way-route-10-200-2-0-24  10.240.0.22         VirtualAppliance  Succeeded            k8s-the-hard-way
 ```
 
 Next: [Deploying the DNS Cluster Add-on](12-dns-addon.md)
