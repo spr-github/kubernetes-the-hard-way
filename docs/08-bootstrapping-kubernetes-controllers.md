@@ -344,11 +344,6 @@ EOF
 ### Verification
 
 Note: run this on the base local machine
-<!-- Install azure CLI
-```
-curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-az login
-``` -->
 
 Retrieve the `kubernetes-the-hard-way` static IP address:
 
