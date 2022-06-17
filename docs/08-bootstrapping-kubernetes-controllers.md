@@ -57,12 +57,10 @@ The instance internal IP address will be used to advertise the API Server to mem
 INTERNAL_IP=$(curl -H Metadata:true "http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0/privateIpAddress?api-version=2017-08-01&format=text")
 
 
-KUBERNETES_PUBLIC_ADDRESS=$(curl -H Metadata:true "http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0/publicIpAddress?api-version=2017-08-01&format=text")
-
-
+KUBERNETES_PUBLIC_ADDRESS=$(az network public-ip show -g k8s-the-hard-way -n k8s-the-hard-way-ip --query ipAddress --output tsv)
 
 ```
-KUBERNETES_PUBLIC_ADDRESS=$(az network public-ip show -g k8s-the-hard-way -n k8s-the-hard-way-ip --query ipAddress --output tsv)
+TODO: figure out the best way to get KUBERNETES_PUBLIC_ADDRESS
 
 Create the `kube-apiserver.service` systemd unit file:
 
