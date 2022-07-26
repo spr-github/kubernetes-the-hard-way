@@ -31,7 +31,7 @@ wget -q --show-progress --https-only --timestamping \
   "https://dl.k8s.io/v1.24.1/bin/linux/amd64/kube-apiserver" \
   "https://dl.k8s.io/v1.24.1/bin/linux/amd64/kube-controller-manager" \
   "https://dl.k8s.io/v1.24.1/bin/linux/amd64/kube-scheduler" \
-  "https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl"
+  "https://dl.k8s.io/release/v1.24.1/bin/linux/amd64/kubectl"
 ```
 
 Install the Kubernetes binaries:
@@ -55,7 +55,12 @@ The instance internal IP address will be used to advertise the API Server to mem
 
 ```
 INTERNAL_IP=$(curl -H Metadata:true "http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0/privateIpAddress?api-version=2017-08-01&format=text")
+
+
+KUBERNETES_PUBLIC_ADDRESS=$(az network public-ip show -g k8s-the-hard-way -n k8s-the-hard-way-ip --query ipAddress --output tsv)
+
 ```
+TODO: figure out the best way to get KUBERNETES_PUBLIC_ADDRESS
 
 Create the `kube-apiserver.service` systemd unit file:
 
@@ -77,20 +82,20 @@ ExecStart=/usr/local/bin/kube-apiserver \\
   --authorization-mode=Node,RBAC \\
   --bind-address=0.0.0.0 \\
   --client-ca-file=/var/lib/kubernetes/ca.pem \\
-  --enable-admission-plugins=Initializers,NamespaceLifecycle,NodeRestriction,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota \\
-  --enable-swagger-ui=true \\
+  --enable-admission-plugins=NamespaceLifecycle,NodeRestriction,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota \\
   --etcd-cafile=/var/lib/kubernetes/ca.pem \\
   --etcd-certfile=/var/lib/kubernetes/kubernetes.pem \\
   --etcd-keyfile=/var/lib/kubernetes/kubernetes-key.pem \\
   --etcd-servers=https://10.240.0.10:2379,https://10.240.0.11:2379,https://10.240.0.12:2379 \\
   --event-ttl=1h \\
-  --experimental-encryption-provider-config=/var/lib/kubernetes/encryption-config.yaml \\
+  --encryption-provider-config=/var/lib/kubernetes/encryption-config.yaml \\
   --kubelet-certificate-authority=/var/lib/kubernetes/ca.pem \\
   --kubelet-client-certificate=/var/lib/kubernetes/kubernetes.pem \\
   --kubelet-client-key=/var/lib/kubernetes/kubernetes-key.pem \\
-  --kubelet-https=true \\
-  --runtime-config=api/all \\
+  --runtime-config='api/all=true' \\
   --service-account-key-file=/var/lib/kubernetes/service-account.pem \\
+  --service-account-signing-key-file=/var/lib/kubernetes/service-account-key.pem \\
+  --service-account-issuer=https://${KUBERNETES_PUBLIC_ADDRESS}:6443 \\
   --service-cluster-ip-range=10.32.0.0/24 \\
   --service-node-port-range=30000-32767 \\
   --tls-cert-file=/var/lib/kubernetes/kubernetes.pem \\
@@ -122,7 +127,7 @@ Documentation=https://github.com/kubernetes/kubernetes
 
 [Service]
 ExecStart=/usr/local/bin/kube-controller-manager \\
-  --address=0.0.0.0 \\
+  --bind-address=0.0.0.0 \\
   --cluster-cidr=10.200.0.0/16 \\
   --cluster-name=kubernetes \\
   --cluster-signing-cert-file=/var/lib/kubernetes/ca.pem \\
@@ -154,7 +159,7 @@ Create the `kube-scheduler.yaml` configuration file:
 
 ```
 cat <<EOF | sudo tee /etc/kubernetes/config/kube-scheduler.yaml
-apiVersion: componentconfig/v1alpha1
+apiVersion: kubescheduler.config.k8s.io/v1beta2
 kind: KubeSchedulerConfiguration
 clientConnection:
   kubeconfig: "/var/lib/kubernetes/kube-scheduler.kubeconfig"
@@ -250,6 +255,15 @@ etcd-0               Healthy   {"health": "true"}
 etcd-1               Healthy   {"health": "true"}
 ```
 
+
+```
+kubectl cluster-info --kubeconfig admin.kubeconfig
+```
+
+```
+Kubernetes control plane is running at https://127.0.0.1:6443
+```
+
 Test the nginx HTTP health check proxy:
 
 ```
@@ -283,7 +297,7 @@ Create the `system:kube-apiserver-to-kubelet` [ClusterRole](https://kubernetes.i
 
 ```
 cat <<EOF | kubectl apply --kubeconfig admin.kubeconfig -f -
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   annotations:
@@ -311,7 +325,7 @@ Bind the `system:kube-apiserver-to-kubelet` ClusterRole to the `kubernetes` user
 
 ```
 cat <<EOF | kubectl apply --kubeconfig admin.kubeconfig -f -
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: system:kube-apiserver
@@ -329,10 +343,13 @@ EOF
 
 ### Verification
 
+Note: run this on the base local machine
+
 Retrieve the `kubernetes-the-hard-way` static IP address:
 
+
 ```
-KUBERNETES_PUBLIC_ADDRESS=$(az network public-ip show -g kubernetes-the-hard-way -n kubernetes-the-hard-way-ip --query ipAddress --output tsv)
+KUBERNETES_PUBLIC_ADDRESS=$(az network public-ip show -g k8s-the-hard-way -n k8s-the-hard-way-ip --query ipAddress --output tsv)
 ```
 
 Make a HTTP request for the Kubernetes version info:
@@ -346,12 +363,12 @@ curl --cacert ca.pem https://${KUBERNETES_PUBLIC_ADDRESS}:6443/version
 ```
 {
   "major": "1",
-  "minor": "12",
-  "gitVersion": "v1.12.0",
-  "gitCommit": "0ed33881dc4355495f623c6f22e7dd0b7632b7c0",
+  "minor": "24",
+  "gitVersion": "v1.24.1",
+  "gitCommit": "3ddd0f45aa91e2f30c70734b175631bec5b5825a",
   "gitTreeState": "clean",
-  "buildDate": "2018-09-27T16:55:41Z",
-  "goVersion": "go1.10.4",
+  "buildDate": "2022-05-24T12:18:48Z",
+  "goVersion": "go1.18.2",
   "compiler": "gc",
   "platform": "linux/amd64"
 }
