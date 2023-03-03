@@ -29,14 +29,14 @@ sudo apt-get -y install socat conntrack ipset
 
 ```
 wget -q --show-progress --https-only --timestamping \
-  https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.24.0/crictl-v1.24.0-linux-amd64.tar.gz \
+  https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.26.0/crictl-v1.26.0-linux-amd64.tar.gz \
   https://storage.googleapis.com/kubernetes-the-hard-way/runsc-50c283b9f56bb7200938d9e207355f05f79f0d17 \
-  https://github.com/opencontainers/runc/releases/download/v1.0.0-rc93/runc.amd64 \
-  https://github.com/containernetworking/plugins/releases/download/v0.9.1/cni-plugins-linux-amd64-v0.9.1.tgz \
-  https://github.com/containerd/containerd/releases/download/v1.4.4/containerd-1.4.4-linux-amd64.tar.gz \
-  https://storage.googleapis.com/kubernetes-release/release/v1.24.0/bin/linux/amd64/kubectl \
-  https://storage.googleapis.com/kubernetes-release/release/v1.24.0/bin/linux/amd64/kube-proxy \
-  https://storage.googleapis.com/kubernetes-release/release/v1.24.0/bin/linux/amd64/kubelet
+  https://github.com/opencontainers/runc/releases/download/v1.1.4/runc.amd64 \
+  https://github.com/containernetworking/plugins/releases/download/v1.2.0/cni-plugins-linux-amd64-v1.2.0.tgz \
+  https://github.com/containerd/containerd/releases/download/v1.6.19/containerd-1.6.19-linux-amd64.tar.gz \
+  https://storage.googleapis.com/kubernetes-release/release/v1.26.2/bin/linux/amd64/kubectl \
+  https://storage.googleapis.com/kubernetes-release/release/v1.26.2/bin/linux/amd64/kube-proxy \
+  https://storage.googleapis.com/kubernetes-release/release/v1.26.2/bin/linux/amd64/kubelet
 ```
 
 Create the installation directories:
@@ -58,9 +58,9 @@ sudo mv runsc-50c283b9f56bb7200938d9e207355f05f79f0d17 runsc
 sudo mv runc.amd64 runc
 chmod +x kubectl kube-proxy kubelet runc runsc
 sudo mv kubectl kube-proxy kubelet runc runsc /usr/local/bin/
-sudo tar -xvf crictl-v1.24.0-linux-amd64.tar.gz -C /usr/local/bin/
-sudo tar -xvf cni-plugins-linux-amd64-v0.9.1.tgz -C /opt/cni/bin/
-sudo tar -xvf containerd-1.4.4-linux-amd64.tar.gz -C /
+sudo tar -xvf crictl-v1.26.0-linux-amd64.tar.gz -C /usr/local/bin/
+sudo tar -xvf cni-plugins-linux-amd64-v1.2.0.tgz -C /opt/cni/bin/
+sudo tar -xvf containerd-1.6.19-linux-amd64.tar.gz -C /
 ```
 
 ### Configure CNI Networking
@@ -286,9 +286,9 @@ kubectl get nodes --kubeconfig admin.kubeconfig
 
 ```
 NAME       STATUS   ROLES    AGE   VERSION
-worker-0   Ready    <none>   35s   v1.12.0
-worker-1   Ready    <none>   36s   v1.12.0
-worker-2   Ready    <none>   36s   v1.12.0
+worker-0   Ready    <none>   35s   v1.26.2
+worker-1   Ready    <none>   36s   v1.26.2
+worker-2   Ready    <none>   36s   v1.26.2
 ```
 
 Next: [Configuring kubectl for Remote Access](10-configuring-kubectl.md)
