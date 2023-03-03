@@ -28,10 +28,10 @@ Download the official Kubernetes release binaries:
 
 ```
 wget -q --show-progress --https-only --timestamping \
-  "https://dl.k8s.io/v1.24.1/bin/linux/amd64/kube-apiserver" \
-  "https://dl.k8s.io/v1.24.1/bin/linux/amd64/kube-controller-manager" \
-  "https://dl.k8s.io/v1.24.1/bin/linux/amd64/kube-scheduler" \
-  "https://dl.k8s.io/release/v1.24.1/bin/linux/amd64/kubectl"
+  "https://dl.k8s.io/v1.26.2/bin/linux/amd64/kube-apiserver" \
+  "https://dl.k8s.io/v1.26.2/bin/linux/amd64/kube-controller-manager" \
+  "https://dl.k8s.io/v1.26.2/bin/linux/amd64/kube-scheduler" \
+  "https://dl.k8s.io/release/v1.26.2/bin/linux/amd64/kubectl"
 ```
 
 Install the Kubernetes binaries:
